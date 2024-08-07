@@ -462,50 +462,28 @@ jobs:
         run: |
           docker run -v "${{ github.workspace }}:/awslc" "gcc-4.8"
 
-  # alpine-linux:
-  #   needs: [sanity-test-run]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       fips: [0, 1]
-  #       compiler: [
-  #         --build-arg CC=clang --build-arg CXX=clang++,
-  #         --build-arg CC=gcc --build-arg CXX=g++
-  #       ]
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     DOCKER_BUILDKIT: 1
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build Docker Image
-  #       run: |
-  #         docker build -t alpine_linux \
-  #         -f .github/docker_images/alpine_linux/Dockerfile \
-  #         ${{ matrix.compiler }} \
-  #         .
-  #     - name: Run tests
-  #       run: |
-  #         docker run -v "${{ github.workspace }}:/awslc" alpine_linux ${{ matrix.fips }}
-
-  alpine-linux-arm64:
+  alpine-linux-x86:
     needs: [sanity-test-run]
     strategy:
       fail-fast: false
-    runs-on: macos-13-xlarge
+      matrix:
+        fips: [0, 1]
+        compiler: [
+          --build-arg CC=clang --build-arg CXX=clang++,
+          --build-arg CC=gcc --build-arg CXX=g++
+        ]
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.18'
       - name: Build Docker Image
         run: |
-          brew install --cask docker
-          docker build -t alpine_linux \
-          --platform=linux/arm64 \
-          -f .github/docker_images/alpine_linux/Dockerfile .
+          docker build -t alpine_linux ${{ matrix.compiler }} .
       - name: Run tests
         run: |
-          docker run -v "${{ github.workspace }}:/awslc" alpine_linux 0
+          docker run -v "${{ github.workspace }}:/awslc" \
+          alpine_linux ${{ matrix.fips }}
 
     # TODO: Investigate sudden hanging tests and failures in GHA runners (P114059413)
 #  MSVC-SDE-32-bit:

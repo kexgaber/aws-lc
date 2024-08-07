@@ -22,6 +22,6 @@ WORKDIR /awslc
 ENV CC=${CC}
 ENV CXX=${CXX}
 
-COPY .github/docker_images/alpine_linux/entry.sh /
+COPY entry.sh /
 
 ENTRYPOINT ["/entry.sh"]
